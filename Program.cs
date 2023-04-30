@@ -35,6 +35,10 @@ namespace RepCopy
             TH.SetApartmentState(ApartmentState.STA);
             TH.Start();
 
+            Thread PR = new Thread(new ThreadStart(PDetect));
+            PR.SetApartmentState(ApartmentState.STA);
+            PR.Start();
+
             Console.WriteLine("-------------------------------------------------------------------------------------------------------\n\n");
             Console.WriteLine("                   R E P C O P Y               ");
             Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
@@ -62,7 +66,7 @@ namespace RepCopy
 
                 if (vcProcesses.Length != 0)
                 {
-                    if(bVCRunning == false)
+                    if(!bVCRunning)
                     {
                         Console.WriteLine("\nVice City running. Ready to copy reps.");
                         Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
@@ -71,7 +75,7 @@ namespace RepCopy
                 }
                 else
                 {
-                    if(bVCRunning == true)
+                    if(bVCRunning)
                     {
                         Console.WriteLine("\nVice City closed. Waiting for game to reopen.");
                         Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
@@ -81,7 +85,7 @@ namespace RepCopy
 
                 if (saProcesses.Length != 0)
                 {
-                    if(bSARunning == false)
+                    if(!bSARunning)
                     {
                         Console.WriteLine("\nSan Andreas running. Ready to copy reps.");
                         Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
@@ -90,7 +94,7 @@ namespace RepCopy
                 }
                 else
                 {
-                    if (bSARunning == true)
+                    if (bSARunning)
                     {
                         Console.WriteLine("\nSan Andreas closed. Waiting for game to reopen.");
                         Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
@@ -99,7 +103,7 @@ namespace RepCopy
                 }
 
                 // FOR MANUAL (F8) BACKUPS
-                if (GetAsyncKeyState(Keys.F8) && bF8KeyPressInstance == false)
+                if (GetAsyncKeyState(Keys.F8) && !bF8KeyPressInstance)
                 {
                     bF8KeyPressInstance = true;
 
@@ -121,7 +125,7 @@ namespace RepCopy
                 }
 
                 //FOR AUTO (F2) BACKUPS
-                if (GetAsyncKeyState(Keys.F2) && bF2KeyPressInstance == false)
+                if (GetAsyncKeyState(Keys.F2) && !bF2KeyPressInstance)
                 {
                     bF2KeyPressInstance = true;
 
@@ -157,7 +161,7 @@ namespace RepCopy
 
 
                 //TO LOCK REPCOPY AND PREVENT ACTIVITY
-                if (GetAsyncKeyState(Keys.F9) && bF9KeyPressInstance == false)
+                if (GetAsyncKeyState(Keys.F9) && !bF9KeyPressInstance)
                 {
                     bF9KeyPressInstance = true;
                     
@@ -194,6 +198,23 @@ namespace RepCopy
                     synth.SpeakAsync("Rep Copy Enabled");
                     Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
                     Console.WriteLine("\nRep Saving Reenabled.");
+                }
+            }
+        }
+
+        static void PDetect()
+        {
+            while (isRunning)
+            {
+                Thread.Sleep(5000);
+                SpeechSynthesizer synth = new SpeechSynthesizer();
+                Process[] vcProcesses = Process.GetProcessesByName("gta-vc");
+                Process[] saProcesses = Process.GetProcessesByName("gta_sa");
+
+                if(vcProcesses.Length > 1 || saProcesses.Length > 1)
+                {
+                    synth.SetOutputToDefaultAudioDevice();
+                    synth.SpeakAsync("Background Process");
                 }
             }
         }
@@ -245,6 +266,7 @@ namespace RepCopy
             parsedDateTime = parsedDateTime.Replace('\\', '_');
             parsedDateTime = parsedDateTime.Replace(':', '-');
             parsedDateTime = parsedDateTime.Replace('/', '-');
+
             try
             {
                 Console.WriteLine("\n\n-------------------------------------------------------------------------------------------------------\n");
